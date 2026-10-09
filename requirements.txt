@@ -1,0 +1,4 @@
+# Use Python 3.10
+gym==0.26.2
+numpy==1.23.5
+matplotlib==3.7.5
