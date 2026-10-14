@@ -1,0 +1,2 @@
+outcome,n_strategies,n_shared_pole_lengths,friedman_statistic,degrees_of_freedom,p_value,kendalls_w,significant_at_0_05
+mean survival steps,4,30,48.52000000000004,3,1.6504620778431684e-10,0.5391111111111115,True
