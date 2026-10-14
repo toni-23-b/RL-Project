@@ -1,5 +1,28 @@
 """Simple CartPole policies with the same agent(state, action_space) interface."""
 
+from pathlib import Path
+
+import torch
+import torch.nn as nn
+
+
+WEIGHTS_DIR = Path(__file__).parent / "weights"
+
+
+class QNetwork(nn.Module):
+    """The 'standard' network from the supplied test script."""
+
+    def __init__(self, state_dim=4, action_dim=2):
+        super().__init__()
+        self.fc1 = nn.Linear(state_dim, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, action_dim)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        return self.fc3(x)
+
 
 def random_agent(state, action_space):
     """Choose left or right uniformly, as in Assignment 2."""
@@ -15,5 +38,23 @@ def heuristic_agent(state, action_space):
     return int(predicted_angle > 0)
 
 
-# Add a new policy here; the evaluation loop stays the same.
-AGENTS = {"random": random_agent, "heuristic": heuristic_agent}
+def dqn_agent(weights_file):
+    """Greedy policy from trained DQN weights, as in the supplied test script."""
+    q_network = QNetwork()
+    q_network.load_state_dict(torch.load(WEIGHTS_DIR / weights_file, weights_only=True))
+    q_network.eval()
+
+    def agent(state, action_space):
+        with torch.no_grad():
+            state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+            return q_network(state).argmax().item()
+
+    return agent
+
+# Add new agents here
+AGENTS = {
+    "random": random_agent,
+    "heuristic": heuristic_agent,
+    "baseline": dqn_agent("baseline.pth"),
+    "disturbance": dqn_agent("disturbance.pth"),
+}
